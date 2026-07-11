@@ -3,8 +3,9 @@
 #include <ws2tcpip.h>
 #pragma comment(lib, "Ws2_32.lib ")
 
-#define ADDRESS "127.0.0.1"
-#define PORT     67
+#define ADDRESS          "127.0.0.1"
+#define PORT             67
+#define RECV_BUFFER_SIZE 500
 
 
 int main (){
@@ -22,9 +23,10 @@ int main (){
 
 
     //socket creation
-    SOCKET server;
-    server = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if(server == INVALID_SOCKET){
+    SOCKET server_socket;
+    SOCKET client_socket;
+    server_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if(server_socket == INVALID_SOCKET){
         printf("[ERROR] socket creation failed returning: %d\nWSAGetLastError returned: %d ", INVALID_SOCKET, WSAGetLastError());
         return -1;
     }else{
@@ -36,7 +38,7 @@ int main (){
     s_server.sin_port        = htons(PORT);
     s_server.sin_addr.s_addr = inet_addr(ADDRESS);
 
-    return_value = bind(server, (struct sockaddr*)&s_server, sizeof(s_server));
+    return_value = bind(server_socket, (struct sockaddr*)&s_server, sizeof(s_server));
     if(return_value == SOCKET_ERROR){
         printf("[ERROR] binding address to socket failed returning: %d\nWSAGetLastError returned: %d ", INVALID_SOCKET, WSAGetLastError());
         return -1;
@@ -44,18 +46,30 @@ int main (){
         printf("[SUCSESS] sock bound to address.\nListening for client...\n");
     }
 
+    int recv_size;
+    int client_size;
+    const char* message = "server received message\n";
+    char recv_data_buffer[RECV_BUFFER_SIZE];
+    char client_ip_buffer[20];
 
-    
+    while(1){
+        // listen for connection
+        return_value = listen(server_socket, 3);
+        //accept connetion
+        client_size  = sizeof(struct sockaddr_in);
+        return_value = accept(server_socket, (struct sockaddr*)&s_client, &client_size);
+        //receive connection
+        recv_size = recv(client_socket, recv_data_buffer, RECV_BUFFER_SIZE, 0);
+        //turn client IP to string
+        inet_ntop(AF_INET, &(s_client.sin_addr), client_ip_buffer, sizeof(client_ip_buffer));
+        //cleasr buffer
+        recv_data_buffer[recv_size] = '\0';
+        //print to client hopfully 
+        printf("Client | IP: %s\n%s\n", client_ip_buffer, recv_data_buffer);
+        send(client_socket, message, strlen(message), 0);
+    }
 
-
-
-
-    
-
-
-
-    
-
-
-
+//clean up
+//todo
+    return 0;
 }
