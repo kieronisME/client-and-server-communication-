@@ -23,8 +23,8 @@ int main (){
 
 
     //socket creation
-    SOCKET server_socket;
-    SOCKET client_socket;
+    SOCKET server_socket = SOCKET_ERROR;
+    SOCKET client_socket = SOCKET_ERROR;
     server_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(server_socket == INVALID_SOCKET){
         printf("[ERROR] socket creation failed returning: %d\nWSAGetLastError returned: %d ", INVALID_SOCKET, WSAGetLastError());
