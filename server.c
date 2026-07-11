@@ -15,7 +15,7 @@ int main (){
         printf("[ERROR] WSAstart up failed returning: %d\nWSAGetLastError returned: %d ", return_value, WSAGetLastError());
         return -1;
     }else{
-        printf("[SUCSESS] WSAStartup initiated");
+        printf("[SUCSESS] WSAStartup initiated\n");
     }
     struct sockaddr_in s_server;
     struct sockaddr_in s_client;
@@ -28,20 +28,20 @@ int main (){
         printf("[ERROR] socket creation failed returning: %d\nWSAGetLastError returned: %d ", INVALID_SOCKET, WSAGetLastError());
         return -1;
     }else{
-        printf("[SUCSESS] socket created");
+        printf("[SUCSESS] socket created\n");
     }
 
 
     s_server.sin_family      = AF_INET;
     s_server.sin_port        = htons(PORT);
-    s_server.sin_addr.s_addr = inet_adrr(ADDRESS);
+    s_server.sin_addr.s_addr = inet_addr(ADDRESS);
 
     return_value = bind(server, (struct sockaddr*)&s_server, sizeof(s_server));
     if(return_value == SOCKET_ERROR){
         printf("[ERROR] binding address to socket failed returning: %d\nWSAGetLastError returned: %d ", INVALID_SOCKET, WSAGetLastError());
         return -1;
     }else{
-        printf("[SUCSESS] sock bound to address.\nListening for client...");
+        printf("[SUCSESS] sock bound to address.\nListening for client...\n");
     }
 
 
