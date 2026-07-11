@@ -55,21 +55,78 @@ int main (){
     while(1){
         // listen for connection
         return_value = listen(server_socket, 3);
+        if(return_value != 0){
+            printf("[ERROR] listeng failed returning: %d\nWSAGetLastError returned: %d ", return_value, WSAGetLastError());
+            return -1;
+        }else{
+            printf("[SUCSESS] listening for clients\n");
+        }
+
         //accept connetion
         client_size  = sizeof(struct sockaddr_in);
         return_value = accept(server_socket, (struct sockaddr*)&s_client, &client_size);
+        if(return_value = INVALID_SOCKET){
+            printf("[ERROR] accepting connection on socket _%d_ failed returning: %d\nWSAGetLastError returned: %d ", server_socket, return_value, WSAGetLastError());
+            return -1;
+        }else{
+            printf("[SUCSESS] accepting connection attempts on socket %d\n",server_socket);
+        }
+
         //receive connection
-        recv_size = recv(client_socket, recv_data_buffer, RECV_BUFFER_SIZE, 0);
+        recv_size  = recv(client_socket, recv_data_buffer, RECV_BUFFER_SIZE, 0);
+        if(recv_size = SOCKET_ERROR){
+            printf("[ERROR] receiving connection from client socket failed failed returning: %d\nWSAGetLastError returned: %d ", recv_size, WSAGetLastError());
+            return -1;
+        }else{
+            printf("[SUCSESS] ready to receive data \n");
+        }
+
         //turn client IP to string
-        inet_ntop(AF_INET, &(s_client.sin_addr), client_ip_buffer, sizeof(client_ip_buffer));
-        //cleasr buffer
+        return_value = inet_ntop(AF_INET, &(s_client.sin_addr), client_ip_buffer, sizeof(client_ip_buffer));
+        if(return_value = NULL){
+            printf("[ERROR] failed to turn IPv4 address into string returning: %d\nWSAGetLastError returned: %d ", return_value, WSAGetLastError());
+            return -1;
+        }else{
+            printf("[SUCSESS] IPv4 address converted into a string\n");
+        }
+
+        //clear buffer
         recv_data_buffer[recv_size] = '\0';
         //print to client hopfully 
         printf("Client | IP: %s\n%s\n", client_ip_buffer, recv_data_buffer);
-        send(client_socket, message, strlen(message), 0);
+        return_value = send(client_socket, message, strlen(message), 0);
+        if(return_value = SOCKET_ERROR ){
+            printf("[ERROR] failed to send data to socket _%d_ returning: %d \nWSAGetLastError returned: %d ", client_socket, return_value, WSAGetLastError());
+            return -1;
+        }
+        
     }
 
-//clean up
-//todo
+    //clean up
+    return_value = closesocket(server_socket);
+    if(return_value = SOCKET_ERROR){
+        printf("[ERROR] failed to close server socket returning: %d\nWSAGetLastError returned: %d ", return_value, WSAGetLastError());
+        return -1;
+    }else{
+        printf("[SUCSESS] server socket is all cleaned up\n");
+    }
+
+    return_value = closesocket(client_socket);
+    if(return_value = SOCKET_ERROR){
+        printf("[ERROR] failed to close client socket returning: %d\nWSAGetLastError returned: %d ", return_value, WSAGetLastError());
+        return -1;
+    }else{
+        printf("[SUCSESS] client socket is all cleaned up\n");
+    }
+
+    return_value = WSACleanup();
+    if(return_value = SOCKET_ERROR){
+        printf("[ERROR] WSACleanup failed returning: %d\nWSAGetLastError returned: %d ", return_value, WSAGetLastError());
+        return -1;
+    }else{
+        printf("[SUCSESS] WSACleanup has finnished cleaning\n");
+    }
+
+    printf("bye bye\n");
     return 0;
 }
