@@ -15,7 +15,7 @@ int main (){
     WSADATA data;
     return_value = WSAStartup(MAKEWORD(2,2), &data);
     if(return_value != 0){
-        printf("[ERROR] WSAstart up failed returning: %d\nWSAGetLastError returned: %d ", return_value, WSAGetLastError());
+        printf("\n[ERROR] WSAstart up failed returning: %d\nWSAGetLastError returned: %d ", return_value, WSAGetLastError());
         return -1;
     }else{
         printf("[SUCSESS] WSAStartup initiated\n");
@@ -25,15 +25,29 @@ int main (){
 
     //socket creation
     SOCKET client = SOCKET_ERROR;
-    return_value  = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    client        = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if(client == SOCKET_ERROR){
+        printf("\n[ERROR] socket creation failed returning: %d\nWSAGetLastError returned: %d ", client, WSAGetLastError());
+        return -1;
+    }else{
+        printf("[SUCSESS] socket created\n");
+    }
 
     s_client.sin_family      = AF_INET;
     s_client.sin_port        = htons(PORT);
     s_client.sin_addr.s_addr = inet_addr(ADDRESS);
 
-    //bind socket to address
-    return_value = bind(client,(struct sockaddr*)&s_client, sizeof(s_client));
-    return_value = connect(client,(struct sockaddr*)&s_client, sizeof(s_client));
+
+    return_value = connect(client, (struct sockaddr*)&s_client, sizeof(s_client));
+    if(return_value == SOCKET_ERROR){
+        if(WSAGetLastError() == 10061){
+            printf("\n[ERROR] connecting to socket failed WSAGetLastError returned: %d , make sure server is on first", WSAGetLastError());
+        }
+        printf("\n[ERROR] connecting to socket failed returning: %d\nWSAGetLastError returned: %d ", return_value, WSAGetLastError());
+        return -1;
+    }else{
+        printf("[SUCSESS] connected\n");
+    }
 
     LPDWORD thread_id;
     HANDLE send_thread = CreateThread(NULL, 0, Send_thread_function, &client, 0, thread_id);
@@ -54,25 +68,44 @@ int main (){
 
 
     }while(return_value > 0);
-    //clean up to do
 
+    //connnection done close thread
+    return_value = CloseHandle(send_thread);
+    if(return_value){
+        printf("[SUCSESS] send thread closed\n");
 
+    }
+
+    //cleanup
+    return_value = shutdown(client, SD_BOTH);
+    if(return_value == SOCKET_ERROR){
+        printf("\n[ERROR] shutdown failed returning: %d\nWSAGetLastError shows the folloing: %d\n", return_value, WSAGetLastError());
+        closesocket(client);
+        WSACleanup();
+        return -1;
+
+    }
+
+    closesocket(client);
+    WSACleanup();
 
     return 0;
 }
 
 DWORD WINAPI Send_thread_function(LPVOID lpParam){
     SOCKET client_again = *(SOCKET*)lpParam;
+    char send_buffer[BUFFER_SIZE];
+    int send_buffer_length;
+    int return_value;
 
-    char send_buffer_length[BUFFER_SIZE];
-    char send_buffer;
     while(1){
-        int return_value = send(client_again, &send_buffer, send_buffer_length, 0);
+        send_buffer_length = strlen(send_buffer);
+        return_value = send(client_again, send_buffer, send_buffer_length, 0);
         if(return_value != send_buffer_length){
-            printf("[ERROR] send failed");
+            printf("\n[ERROR] send failed\n");
             break;
 
-        }else if (memcmp(send_buffer_length, "/Q", 2) || memcmp(send_buffer_length, "/q", 2)){
+        }else if (memcmp(send_buffer, "/Q", 2) || memcmp(send_buffer, "/q", 2)){
             break;
         }
 

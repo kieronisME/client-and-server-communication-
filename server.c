@@ -65,7 +65,7 @@ int main (){
         //accept connetion
         client_size  = sizeof(struct sockaddr_in);
         return_value = accept(server_socket, (struct sockaddr*)&s_client, &client_size);
-        if(return_value = INVALID_SOCKET){
+        if(return_value == INVALID_SOCKET){
             printf("[ERROR] accepting connection on socket _%d_ failed returning: %d\nWSAGetLastError returned: %d ", server_socket, return_value, WSAGetLastError());
             return -1;
         }else{
@@ -74,7 +74,7 @@ int main (){
 
         //receive connection
         recv_size  = recv(client_socket, recv_data_buffer, RECV_BUFFER_SIZE, 0);
-        if(recv_size = SOCKET_ERROR){
+        if(recv_size == SOCKET_ERROR){
             printf("[ERROR] receiving connection from client socket failed failed returning: %d\nWSAGetLastError returned: %d ", recv_size, WSAGetLastError());
             return -1;
         }else{
@@ -82,7 +82,7 @@ int main (){
         }
 
         //turn client IP to string
-        return_value = inet_ntop(AF_INET, &(s_client.sin_addr), client_ip_buffer, sizeof(client_ip_buffer));
+        LPCSTR VALUE = inet_ntop(AF_INET, &(s_client.sin_addr), client_ip_buffer, sizeof(client_ip_buffer));
         if(return_value = NULL){
             printf("[ERROR] failed to turn IPv4 address into string returning: %d\nWSAGetLastError returned: %d ", return_value, WSAGetLastError());
             return -1;
@@ -95,7 +95,7 @@ int main (){
         //print to client hopfully 
         printf("Client | IP: %s\n%s\n", client_ip_buffer, recv_data_buffer);
         return_value = send(client_socket, message, strlen(message), 0);
-        if(return_value = SOCKET_ERROR ){
+        if(return_value == SOCKET_ERROR ){
             printf("[ERROR] failed to send data to socket _%d_ returning: %d \nWSAGetLastError returned: %d ", client_socket, return_value, WSAGetLastError());
             return -1;
         }
@@ -104,7 +104,7 @@ int main (){
 
     //clean up
     return_value = closesocket(server_socket);
-    if(return_value = SOCKET_ERROR){
+    if(return_value == SOCKET_ERROR){
         printf("[ERROR] failed to close server socket returning: %d\nWSAGetLastError returned: %d ", return_value, WSAGetLastError());
         return -1;
     }else{
@@ -112,7 +112,7 @@ int main (){
     }
 
     return_value = closesocket(client_socket);
-    if(return_value = SOCKET_ERROR){
+    if(return_value == SOCKET_ERROR){
         printf("[ERROR] failed to close client socket returning: %d\nWSAGetLastError returned: %d ", return_value, WSAGetLastError());
         return -1;
     }else{
@@ -120,7 +120,7 @@ int main (){
     }
 
     return_value = WSACleanup();
-    if(return_value = SOCKET_ERROR){
+    if(return_value == SOCKET_ERROR){
         printf("[ERROR] WSACleanup failed returning: %d\nWSAGetLastError returned: %d ", return_value, WSAGetLastError());
         return -1;
     }else{
