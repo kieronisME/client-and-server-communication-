@@ -64,8 +64,8 @@ int main (){
 
         //accept connetion
         client_size  = sizeof(struct sockaddr_in);
-        return_value = accept(server_socket, (struct sockaddr*)&s_client, &client_size);
-        if(return_value == INVALID_SOCKET){
+        client_socket = accept(server_socket, (struct sockaddr*)&s_client, &client_size);
+        if(client_socket == INVALID_SOCKET){
             printf("[ERROR] accepting connection on socket _%d_ failed returning: %d\nWSAGetLastError returned: %d ", server_socket, return_value, WSAGetLastError());
             return -1;
         }else{
@@ -75,7 +75,7 @@ int main (){
         //receive connection
         recv_size  = recv(client_socket, recv_data_buffer, RECV_BUFFER_SIZE, 0);
         if(recv_size == SOCKET_ERROR){
-            printf("[ERROR] receiving connection from client socket failed failed returning: %d\nWSAGetLastError returned: %d ", recv_size, WSAGetLastError());
+            printf("[ERROR] receiving connection from client socket failed returning: %d\nWSAGetLastError returned: %d ", recv_size, WSAGetLastError());
             return -1;
         }else{
             printf("[SUCSESS] ready to receive data \n");
@@ -83,7 +83,7 @@ int main (){
 
         //turn client IP to string
         LPCSTR VALUE = inet_ntop(AF_INET, &(s_client.sin_addr), client_ip_buffer, sizeof(client_ip_buffer));
-        if(return_value = NULL){
+        if(VALUE = NULL){
             printf("[ERROR] failed to turn IPv4 address into string returning: %d\nWSAGetLastError returned: %d ", return_value, WSAGetLastError());
             return -1;
         }else{

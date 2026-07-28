@@ -24,8 +24,7 @@ int main (){
     struct sockaddr_in s_client;
 
     //socket creation
-    SOCKET client = SOCKET_ERROR;
-    client        = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    SOCKET client = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(client == SOCKET_ERROR){
         printf("\n[ERROR] socket creation failed returning: %d\nWSAGetLastError returned: %d ", client, WSAGetLastError());
         return -1;
