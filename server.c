@@ -63,7 +63,7 @@ int main (){
         }
 
         //accept connetion
-        client_size  = sizeof(struct sockaddr_in);
+        client_size   = sizeof(struct sockaddr_in);
         client_socket = accept(server_socket, (struct sockaddr*)&s_client, &client_size);
         if(client_socket == INVALID_SOCKET){
             printf("[ERROR] accepting connection on socket _%d_ failed returning: %d\nWSAGetLastError returned: %d ", server_socket, return_value, WSAGetLastError());
@@ -72,6 +72,8 @@ int main (){
             printf("[SUCSESS] accepting connection attempts on socket %d\n",server_socket);
         }
 
+        //clear buffer
+        memset(recv_data_buffer, 0, sizeof(recv_data_buffer));
         //receive connection
         recv_size  = recv(client_socket, recv_data_buffer, RECV_BUFFER_SIZE, 0);
         if(recv_size == SOCKET_ERROR){

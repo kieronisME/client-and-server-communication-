@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <WinSock2.h>
 #include <ws2tcpip.h>
-#pragma comment(lib, "Ws2_32.lib ")
+#pragma comment(lib, "Ws2_32.lib")
 
-#define ADDRESS          "127.0.0.1"
-#define PORT             67
+#define ADDRESS     "127.0.0.1"
+#define PORT        67
 #define BUFFER_SIZE 512
 
 // send messages to server on seprate thread
@@ -21,8 +21,6 @@ int main (){
         printf("[SUCSESS] WSAStartup initiated\n");
     }
 
-    struct sockaddr_in s_client;
-
     //socket creation
     SOCKET client = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(client == SOCKET_ERROR){
@@ -32,6 +30,7 @@ int main (){
         printf("[SUCSESS] socket created\n");
     }
 
+    struct sockaddr_in s_client;
     s_client.sin_family      = AF_INET;
     s_client.sin_port        = htons(PORT);
     s_client.sin_addr.s_addr = inet_addr(ADDRESS);
@@ -40,7 +39,8 @@ int main (){
     return_value = connect(client, (struct sockaddr*)&s_client, sizeof(s_client));
     if(return_value == SOCKET_ERROR){
         if(WSAGetLastError() == 10061){
-            printf("\n[ERROR] connecting to socket failed WSAGetLastError returned: %d , make sure server is on first", WSAGetLastError());
+            printf("\n[ERROR] connecting to socket failed WSAGetLastError returned: %d, make sure server is on first", WSAGetLastError());
+            return -1;
         }
         printf("\n[ERROR] connecting to socket failed returning: %d\nWSAGetLastError returned: %d ", return_value, WSAGetLastError());
         return -1;
@@ -48,8 +48,13 @@ int main (){
         printf("[SUCSESS] connected\n");
     }
 
-    LPDWORD thread_id;
-    HANDLE send_thread = CreateThread(NULL, 0, Send_thread_function, &client, 0, thread_id);
+    DWORD thread_id;
+    HANDLE send_thread = CreateThread(NULL, 0, Send_thread_function, &client, 0, &thread_id);
+    if (send_thread){
+        printf("[SUCSESS] send thread printed with ID: %d\n", thread_id);
+    }else{
+        printf("[ERROR] send thread failed returning: %d\n ", GetLastError());
+    }
 
     char recv_buffer[BUFFER_SIZE];
     do{
@@ -60,6 +65,7 @@ int main (){
 
         }else if(!return_value){
             printf("server is closing connection\n");
+            
         }else{
             printf("recived failed WSAGetLastError shows the folloing: %d\n ", WSAGetLastError());
             return -1;
@@ -98,14 +104,13 @@ DWORD WINAPI Send_thread_function(LPVOID lpParam){
     int return_value;
 
     while(1){
+        scanf("%s", send_buffer);
         send_buffer_length = strlen(send_buffer);
         return_value = send(client_again, send_buffer, send_buffer_length, 0);
         if(return_value != send_buffer_length){
             printf("\n[ERROR] send failed\n");
             break;
 
-        }else if (memcmp(send_buffer, "/Q", 2) || memcmp(send_buffer, "/q", 2)){
-            break;
         }
 
     }
