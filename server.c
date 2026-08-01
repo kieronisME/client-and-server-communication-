@@ -5,7 +5,7 @@
 
 #define ADDRESS          "127.0.0.1"
 #define PORT             67
-#define RECV_BUFFER_SIZE 500
+#define RECV_BUFFER_SIZE 50000
 
 
 int main (){
@@ -58,8 +58,6 @@ int main (){
         if(return_value != 0){
             printf("[ERROR] listeng failed returning: %d\nWSAGetLastError returned: %d ", return_value, WSAGetLastError());
             return -1;
-        }else{
-            printf("[SUCSESS] listening for clients\n");
         }
 
         //accept connetion
@@ -72,17 +70,6 @@ int main (){
             printf("[SUCSESS] accepting connection attempts on socket %d\n",server_socket);
         }
 
-        //clear buffer
-        memset(recv_data_buffer, 0, sizeof(recv_data_buffer));
-        //receive connection
-        recv_size  = recv(client_socket, recv_data_buffer, RECV_BUFFER_SIZE, 0);
-        if(recv_size == SOCKET_ERROR){
-            printf("[ERROR] receiving connection from client socket failed returning: %d\nWSAGetLastError returned: %d ", recv_size, WSAGetLastError());
-            return -1;
-        }else{
-            printf("[SUCSESS] ready to receive data \n");
-        }
-
         //turn client IP to string
         LPCSTR VALUE = inet_ntop(AF_INET, &(s_client.sin_addr), client_ip_buffer, sizeof(client_ip_buffer));
         if(VALUE = NULL){
@@ -92,16 +79,35 @@ int main (){
             printf("[SUCSESS] IPv4 address converted into a string\n");
         }
 
-        //clear buffer
-        recv_data_buffer[recv_size] = '\0';
+
         //print to client hopfully 
-        printf("Client | IP: %s\n%s\n", client_ip_buffer, recv_data_buffer);
-        return_value = send(client_socket, message, strlen(message), 0);
-        if(return_value == SOCKET_ERROR ){
-            printf("[ERROR] failed to send data to socket _%d_ returning: %d \nWSAGetLastError returned: %d ", client_socket, return_value, WSAGetLastError());
-            return -1;
+
+        while (1){
+            //recviec
+            memset(recv_data_buffer, 0, sizeof(recv_data_buffer));
+            recv_size  = recv(client_socket, recv_data_buffer, RECV_BUFFER_SIZE, 0);
+            if(recv_size == SOCKET_ERROR){
+                printf("[ERROR] receiving connection from client socket failed returning: %d\nWSAGetLastError returned: %d ", recv_size, WSAGetLastError());
+                break;
+
+            }else if(recv_size > 0){
+                printf("Client %s: %s\n", client_ip_buffer, recv_data_buffer);
+                recv_data_buffer[recv_size] = '\0';
+                return_value = send(client_socket, message, strlen(message), 0);
+                if(return_value == SOCKET_ERROR ){
+                    printf("[ERROR] failed to send data to socket _%d_ returning: %d \nWSAGetLastError returned: %d ", client_socket, return_value, WSAGetLastError());
+                    return -1;
+                }
+                
+            }else if(recv_size == 0){
+                printf("Client %s disconnected\n", client_ip_buffer);
+                break;
+
+            }
+
         }
-        
+        closesocket(client_socket);
+
     }
 
     //clean up

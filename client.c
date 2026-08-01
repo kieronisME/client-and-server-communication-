@@ -5,7 +5,7 @@
 
 #define ADDRESS     "127.0.0.1"
 #define PORT        67
-#define BUFFER_SIZE 512
+#define BUFFER_SIZE 500
 
 // send messages to server on seprate thread
 DWORD WINAPI Send_thread_function(LPVOID lpParam);
@@ -48,6 +48,7 @@ int main (){
         printf("[SUCSESS] connected\n");
     }
 
+    printf("count in main\n");
     DWORD thread_id;
     HANDLE send_thread = CreateThread(NULL, 0, Send_thread_function, &client, 0, &thread_id);
     if (send_thread){
@@ -104,15 +105,15 @@ DWORD WINAPI Send_thread_function(LPVOID lpParam){
     int return_value;
 
     while(1){
-        scanf("%s", send_buffer);
-        send_buffer_length = strlen(send_buffer);
+        memset(send_buffer, 0, sizeof(send_buffer));
+        fgets(send_buffer, sizeof(send_buffer), stdin);
+        send_buffer_length = strlen(send_buffer);     
         return_value = send(client_again, send_buffer, send_buffer_length, 0);
         if(return_value != send_buffer_length){
             printf("\n[ERROR] send failed\n");
             break;
-
         }
-
+    
     }
 
     return 0;
